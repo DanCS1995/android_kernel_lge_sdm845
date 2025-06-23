@@ -291,6 +291,7 @@ static const struct bpf_func_proto *bpf_get_probe_write_proto(void)
 BPF_CALL_5(bpf_trace_printk, char *, fmt, u32, fmt_size, u64, arg1,
 	   u64, arg2, u64, arg3)
 {
+#ifdef CONFIG_EVENT_TRACING
 	bool str_seen = false;
 	int mod[3] = {};
 	int fmt_cnt = 0;
@@ -398,6 +399,9 @@ BPF_CALL_5(bpf_trace_printk, char *, fmt, u32, fmt_size, u64, arg1,
 	      : __BPF_ARG2_TP((u32)arg3, ##__VA_ARGS__)))
 
 	return __BPF_TP_EMIT();
+#else
+	return 0;
+#endif
 }
 
 static const struct bpf_func_proto bpf_trace_printk_proto = {
@@ -832,6 +836,7 @@ static const struct bpf_func_proto bpf_perf_prog_read_value_proto = {
          .arg3_type      = ARG_CONST_SIZE,
 };
 
+#ifdef CONFIG_EVENT_TRACING
 static const struct bpf_func_proto *
 pe_prog_func_proto(enum bpf_func_id func_id, const struct bpf_prog *prog)
 {
@@ -846,6 +851,7 @@ pe_prog_func_proto(enum bpf_func_id func_id, const struct bpf_prog *prog)
 		return tracing_func_proto(func_id, prog);
 	}
 }
+#endif /* CONFIG_EVENT_TRACING */
 
 /*
   * bpf_raw_tp_regs are separate from bpf_pt_regs used from skb/xdp
@@ -985,6 +991,7 @@ const struct bpf_verifier_ops raw_tracepoint_writable_verifier_ops = {
 const struct bpf_prog_ops raw_tracepoint_writable_prog_ops = {
 };
 
+#ifdef CONFIG_EVENT_TRACING
 static bool pe_prog_is_valid_access(int off, int size, enum bpf_access_type type,
 				    const struct bpf_prog *prog,
 				    struct bpf_insn_access_aux *info)
@@ -1145,6 +1152,7 @@ int perf_event_query_prog_array(struct perf_event *event, void __user *info)
 
  	return ret;
 }
+#endif /* CONFIG_EVENT_TRACING */
 
 extern struct bpf_raw_event_map __start__bpf_raw_tp[];
 extern struct bpf_raw_event_map __stop__bpf_raw_tp[];
