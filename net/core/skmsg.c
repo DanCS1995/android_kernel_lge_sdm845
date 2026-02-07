@@ -726,7 +726,7 @@ static void sk_psock_write_space(struct sock *sk)
 
 int sk_psock_init_strp(struct sock *sk, struct sk_psock *psock)
 {
-	static const struct strp_callbacks cb = {
+	static struct strp_callbacks cb = {
 		.rcv_msg	= sk_psock_strp_read,
 		.read_sock_done	= sk_psock_strp_read_done,
 		.parse_msg	= sk_psock_strp_parse,
